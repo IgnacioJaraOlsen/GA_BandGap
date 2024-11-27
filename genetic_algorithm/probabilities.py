@@ -10,17 +10,17 @@ def adaptive_crossover_probability(f):
     num = f_max - f
     den = f_max - f_mean
     
-    if den != 0:
+    if np.isclose(den, 0, atol=1e-3):
         p = lambda f : 0.3 * np.divide(num, den)
     else:
-        p = lambda f: 0.6
+        p = lambda f: 0.3
     
     pc = np.where(f >= f_mean, 
                   p(f), 
                   0.9)
     return pc
 
-def adaptive_mutation_probability(f, pm, _lambda = 0.99):
+def adaptive_mutation_probability(f, pm, _lambda = 0.7):
     f = list(f)
     f = np.squeeze(f)
     #_lambda = random.random()
