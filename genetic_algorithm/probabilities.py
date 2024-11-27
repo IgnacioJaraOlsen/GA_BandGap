@@ -20,7 +20,7 @@ def adaptive_crossover_probability(f):
                   0.9)
     return pc
 
-def adaptive_mutation_probability(f, pm, _lambda = 0.7):
+def adaptive_mutation_probability(f, pm, _lambda = 0.8):
     f = list(f)
     f = np.squeeze(f)
     #_lambda = random.random()
