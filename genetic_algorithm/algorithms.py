@@ -1,8 +1,44 @@
 from deap import tools, algorithms
 from genetic_algorithm import probabilities
+from collections import Counter
 import numpy as np
 import random
 import tqdm
+
+
+def eval(population):
+    """
+    esta función solo se puede utilizar si no hay variación 
+    en los materiales que conforman la estructura debido a que
+    se reutiliza los valores calculados si hay gens repetidos
+    """
+    todos_genes = []
+    
+    # Recopilar todos los genes de la población
+    for ind in population:
+        todos_genes.extend(ind.gens)
+
+    # Contar las ocurrencias de los elementos
+    contador_genes = Counter(todos_genes)
+
+    # Filtrar los elementos que se repiten o aparecen solo una vez
+    todos_genes_filtrados = [gen for gen, count in contador_genes.items() if count > 0]
+    
+    # Filtrar individuos con genes no calculados (invalidos)
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+
+    # Buscar los individuos válidos que tengan los mismos genes
+    for ind in invalid_ind:
+        # Buscar un individuo válido con los mismos genes
+        matching_valid_individual = next((valid_ind for valid_ind in population 
+                                          if valid_ind.fitness.valid and valid_ind.gens == ind.gens), None)
+        
+        if matching_valid_individual:
+            # Asignar el 'fitness' del individuo válido con los mismos genes
+            ind.fitness.values = matching_valid_individual.fitness.values
+            ind.fitness.valid = True  # Marcar el fitness como válido
+
+    return population
 
 def var(population, toolbox,):
     offspring = []
@@ -23,10 +59,10 @@ def var(population, toolbox,):
 
 #__debug__
 def ea(population, toolbox, ngen,
-          stats=None, halloffame=None, verbose=False):
+          stats=None, halloffame=None, verbose=False, _lambda = 0.9):
     
     # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]  if population[0].var == 0 else population
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
 
     for ind, fit in zip(invalid_ind, fitnesses):
@@ -55,7 +91,7 @@ def ea(population, toolbox, ngen,
             selected_fitnesses = [ind.fitness.values for ind in population]
             
             pc = probabilities.adaptive_crossover_probability(selected_fitnesses) if gen != 1 else np.full(len(population), pc)
-            pm = probabilities.adaptive_mutation_probability(selected_fitnesses, pm) if gen != 1 else pm
+            pm = probabilities.adaptive_mutation_probability(selected_fitnesses, pm, _lambda = _lambda) if gen != 1 else pm
             
             for ind, pc_i in zip(population, pc):
                 ind.pc = pc_i
@@ -65,7 +101,7 @@ def ea(population, toolbox, ngen,
             offspring = var(population, toolbox)
             
             # Evaluate the individuals with an invalid fitness
-            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid] if offspring[0].var == 0 else offspring
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit

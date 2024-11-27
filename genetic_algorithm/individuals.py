@@ -1,7 +1,7 @@
 from bandgap.plot_structure import plot_structure
 from bandgap.plot_bands import plot_bands
 from bandgap.band_gap import band_gap
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 import copy
 
@@ -21,6 +21,7 @@ class truss_like:
     bandgap = None
     data_bandgap = None
     pm = None
+    var: float = field(default=0)
 
     def __post_init__(self):
         self.D2 = self.D1 * 2 if self.D2 is None else self.D2
