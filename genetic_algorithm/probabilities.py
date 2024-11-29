@@ -31,7 +31,7 @@ def adaptive_mutation_probability(f, pm, _lambda = 0.5):
     
     #  sum_num/sum_den *
     
-    pm = (1 -  factor ) * pm  if pm < 0.10 else pm
-    
+    pm = (1 -  factor ) * pm
+    pm = pm if pm <= 0.5 else 0.5
     
     return min(pm, 1)
