@@ -90,8 +90,10 @@ def ea(population, toolbox, ngen,
             
             selected_fitnesses = [ind.fitness.values for ind in population]
             
+            avg = logbook.select("avg")
+            
             pc = probabilities.adaptive_crossover_probability(selected_fitnesses) if gen != 1 else np.full(len(population), pc)
-            pm = probabilities.adaptive_mutation_probability(selected_fitnesses, pm, _lambda = _lambda) if gen != 1 else pm
+            pm = probabilities.adaptive_mutation_probability(avg, pm, _lambda = _lambda) if gen != 1 else pm
             
             for ind, pc_i in zip(population, pc):
                 ind.pc = pc_i
